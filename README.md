@@ -466,7 +466,7 @@ The project explores how an AI system can become a more persistent and interacti
 
 ### Riyanshu
 
-Aspiring AI/ML Engineer interested in:
+AI/ML Engineer interested in:
 
 - Machine Learning
 - Deep Learning
