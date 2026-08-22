@@ -25,7 +25,7 @@ import textwrap
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_mic_recorder import mic_recorder
-from core.memory_state import upload_avatar_audio
+from core.memory_store import upload_avatar_audio
 from core.llm import generate_response
 from core.personality import PERSONALITY
 from core.memory import ConversationMemory
