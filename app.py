@@ -25,7 +25,8 @@ import textwrap
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_mic_recorder import mic_recorder
-from core.memory_store import upload_avatar_audio
+
+
 from core.llm import generate_response
 from core.personality import PERSONALITY
 from core.memory import ConversationMemory
@@ -57,8 +58,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-if "avatar_audio_url" not in st.session_state:
-    st.session_state.avatar_audio_url = None
+
 
 # ============================================================
 # AVATAR IFRAME
@@ -68,25 +68,10 @@ if "avatar_audio_url" not in st.session_state:
 # AI DIGITAL TWIN AVATAR
 # ============================================================
 
-def show_avatar(audio_url=None):
+def show_avatar():
 
-    avatar_url = (
-        "https://riyanshu-07.github.io/"
-        "ai-digital-twin/avatar/"
-    )
-
-    if audio_url:
-        from urllib.parse import quote
-
-        avatar_url += (
-            "?audio=" + quote(
-                audio_url,
-                safe=""
-            )
-        )
-
-    st.iframe(
-        avatar_url,
+    components.iframe(
+        "http://localhost:8000/avatar/",
         height=700,
         scrolling=False
     )
@@ -1736,10 +1721,11 @@ Now answer the CURRENT USER QUESTION.
     # ========================================================
 
     # ========================================================
-    # TTS VOICE SYNTHESIS
-    # ========================================================
+# TTS VOICE SYNTHESIS
+# ========================================================
 
     try:
+
         project_root = os.path.dirname(
             os.path.abspath(__file__)
         )
@@ -1760,7 +1746,6 @@ Now answer the CURRENT USER QUESTION.
             "latest.mp3"
         )
 
-        # Generate voice
         with st.spinner("🔊 Synthesizing avatar voice..."):
 
             text_to_speech(
@@ -1768,53 +1753,11 @@ Now answer the CURRENT USER QUESTION.
                 audio_path
             )
 
-        # ----------------------------------------------------
-        # VERIFY AUDIO
-        # ----------------------------------------------------
-
-        if (
-            os.path.exists(audio_path)
-            and os.path.getsize(audio_path) > 0
-        ):
-
-            # Streamlit audio player
-            with open(
-                audio_path,
-                "rb"
-            ) as audio_file:
-
-                audio_bytes = audio_file.read()
-
-            st.audio(
-                audio_bytes,
-                format="audio/mpeg"
-            )
-
-            # ------------------------------------------------
-            # UPLOAD AUDIO TO SUPABASE
-            # ------------------------------------------------
-
-            avatar_audio_url = upload_avatar_audio(
-                audio_path
-            )
-
-            # Store URL for avatar
-            st.session_state.avatar_audio_url = (
-                avatar_audio_url
-            )
-
-        else:
-
-            st.warning(
-                "⚠️ Voice file was not generated."
-            )
-
     except Exception as e:
 
         st.warning(
             f"Voice generation warning: {e}"
         )
-
     # ========================================================
     # MEMORY UPDATES
     # ========================================================
