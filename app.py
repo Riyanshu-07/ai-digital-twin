@@ -65,9 +65,9 @@ st.set_page_config(
 
 def show_avatar():
     components.iframe(
-        "http://localhost:8000",
-        height=690,
-        scrolling=False,
+        "https://riyanshu-07.github.io/ai-digital-twin/avatar/",
+        height=700,
+        scrolling=False
     )
 
 
