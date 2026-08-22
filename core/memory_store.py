@@ -15,6 +15,28 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+def upload_avatar_audio(audio_path):
+
+    bucket_name = "avatar-audio"
+    file_name = "latest.mp3"
+
+    with open(audio_path, "rb") as audio_file:
+        audio_bytes = audio_file.read()
+
+    supabase.storage.from_(bucket_name).upload(
+        file_name,
+        audio_bytes,
+        {
+            "content-type": "audio/mpeg",
+            "upsert": "true",
+        },
+    )
+
+    return (
+        f"{SUPABASE_URL}/storage/v1/object/public/"
+        f"{bucket_name}/{file_name}"
+    )
+
 def get_all_memories():
 
     response = (

@@ -25,7 +25,7 @@ import textwrap
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_mic_recorder import mic_recorder
-
+from core.memory_state import upload_avatar_audio
 from core.llm import generate_response
 from core.personality import PERSONALITY
 from core.memory import ConversationMemory
@@ -57,15 +57,36 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
+if "avatar_audio_url" not in st.session_state:
+    st.session_state.avatar_audio_url = None
 
 # ============================================================
 # AVATAR IFRAME
 # ============================================================
 
-def show_avatar():
-    components.iframe(
-        "https://riyanshu-07.github.io/ai-digital-twin/avatar/",
+# ============================================================
+# AI DIGITAL TWIN AVATAR
+# ============================================================
+
+def show_avatar(audio_url=None):
+
+    avatar_url = (
+        "https://riyanshu-07.github.io/"
+        "ai-digital-twin/avatar/"
+    )
+
+    if audio_url:
+        from urllib.parse import quote
+
+        avatar_url += (
+            "?audio=" + quote(
+                audio_url,
+                safe=""
+            )
+        )
+
+    st.iframe(
+        avatar_url,
         height=700,
         scrolling=False
     )
@@ -1327,7 +1348,7 @@ with avatar_column:
         """
     )
 
-    show_avatar()
+    show_avatar(st.session_state.get("avatar_audio_url"))
 
     html(
         """
@@ -1429,13 +1450,50 @@ with chat_column:
 
     # Audio playback channel if available
     project_root = os.path.dirname(os.path.abspath(__file__))
-    audio_path = os.path.join(project_root, "avatar", "audio", "latest.mp3")
-    if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0 and len(st.session_state.messages) > 0:
-        with st.expander("", expanded=False):
+    audio_path = os.path.join(
+    project_root,
+    "avatar",
+    "audio",
+    "latest.mp3"
+    )
+
+    if (
+        os.path.exists(audio_path)
+        and os.path.getsize(audio_path) > 0
+        and len(st.session_state.messages) > 0
+    ):
+
+        with st.expander("🔊 Voice Output", expanded=False):
+
             with open(audio_path, "rb") as audio_file:
-                st.audio(audio_file.read(), format="audio/mpeg")
 
+                audio_bytes = audio_file.read()
 
+                st.audio(
+                    audio_bytes,
+                    format="audio/mpeg"
+                )
+
+            # Avatar audio URL
+            avatar_audio_url = (
+                "http://localhost:8000/avatar/audio/latest.mp3"
+            )
+
+            # Send the audio URL to the avatar
+            st.markdown(
+                f"""
+                <script>
+                    window.parent.postMessage(
+                        {{
+                            type: "",
+                            audioUrl: "{avatar_audio_url}"
+                        }},
+                        "*"
+                    );
+                </script>
+                """,
+                unsafe_allow_html=True
+            )
 # ============================================================
 # VOICE PROCESSING
 # ============================================================
@@ -1677,17 +1735,85 @@ Now answer the CURRENT USER QUESTION.
     # TTS VOICE SYNTHESIS
     # ========================================================
 
-    try:
-        project_root = os.path.dirname(os.path.abspath(__file__))
-        avatar_audio_dir = os.path.join(project_root, "avatar", "audio")
-        os.makedirs(avatar_audio_dir, exist_ok=True)
-        audio_path = os.path.join(avatar_audio_dir, "latest.mp3")
+    # ========================================================
+    # TTS VOICE SYNTHESIS
+    # ========================================================
 
+    try:
+        project_root = os.path.dirname(
+            os.path.abspath(__file__)
+        )
+
+        avatar_audio_dir = os.path.join(
+            project_root,
+            "avatar",
+            "audio"
+        )
+
+        os.makedirs(
+            avatar_audio_dir,
+            exist_ok=True
+        )
+
+        audio_path = os.path.join(
+            avatar_audio_dir,
+            "latest.mp3"
+        )
+
+        # Generate voice
         with st.spinner("🔊 Synthesizing avatar voice..."):
-            text_to_speech(response, audio_path)
+
+            text_to_speech(
+                response,
+                audio_path
+            )
+
+        # ----------------------------------------------------
+        # VERIFY AUDIO
+        # ----------------------------------------------------
+
+        if (
+            os.path.exists(audio_path)
+            and os.path.getsize(audio_path) > 0
+        ):
+
+            # Streamlit audio player
+            with open(
+                audio_path,
+                "rb"
+            ) as audio_file:
+
+                audio_bytes = audio_file.read()
+
+            st.audio(
+                audio_bytes,
+                format="audio/mpeg"
+            )
+
+            # ------------------------------------------------
+            # UPLOAD AUDIO TO SUPABASE
+            # ------------------------------------------------
+
+            avatar_audio_url = upload_avatar_audio(
+                audio_path
+            )
+
+            # Store URL for avatar
+            st.session_state.avatar_audio_url = (
+                avatar_audio_url
+            )
+
+        else:
+
+            st.warning(
+                "⚠️ Voice file was not generated."
+            )
 
     except Exception as e:
-        st.warning(f"Voice generation warning: {e}")
+
+        st.warning(
+            f"Voice generation warning: {e}"
+        )
 
     # ========================================================
     # MEMORY UPDATES
