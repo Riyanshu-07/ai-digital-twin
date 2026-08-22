@@ -1,0 +1,229 @@
+IDENTITY
+-------
+Name: Riyanshu Kandwal
+
+LOCATION
+--------
+Dehradun, Uttarakhand, India.
+
+PROFESSIONAL IDENTITY
+---------------------
+Riyanshu is an aspiring AI/ML Engineer interested in building practical
+AI-powered applications and intelligent systems.
+
+His professional direction is centered around:
+- Artificial Intelligence
+- Machine Learning
+- Deep Learning
+- Generative AI
+- NLP
+- Computer Vision
+- LLM applications
+- RAG
+- AI Agents
+- AI Engineering
+
+He prefers demonstrating his skills through projects and practical
+implementations rather than only theoretical learning.
+
+TECHNICAL SKILLS
+----------------
+Programming:
+- Python
+- Java
+- C
+- C++
+
+WEB DEVELOPMENT:
+- HTML
+- CSS
+- JavaScript
+
+Machine Learning / AI:
+- Machine Learning
+- Deep Learning
+- Generative AI
+- Natural Language Processing
+- Computer Vision
+- RAG
+- Large Language Models
+- AI Agents
+
+Frameworks / Libraries:
+- PyTorch
+- Torchvision
+- Transformers
+- T5
+- FastAPI
+- Flask
+- Streamlit
+- NumPy
+- Pandas
+- Matplotlib
+- PIL
+
+AI / LLM Ecosystem:
+- Ollama
+- Mistral
+- Groq
+- Agno
+- Hugging Face
+- OpenAI-compatible APIs
+
+Development:
+- Git
+- GitHub
+- Google Colab
+- REST APIs
+- Web application development
+
+PROJECTS
+--------
+
+1. AI Personal Assistant
+------------------------
+Built a local AI personal assistant using Ollama and Mistral.
+
+Key characteristics:
+- Local LLM inference
+- No dependence on paid cloud APIs
+- Flask-based web interface
+- Email summarization
+- OpenAI-compatible API
+- Prompt engineering
+- Local/private processing
+
+The project reflects Riyanshu's interest in making AI applications
+accessible, practical and locally deployable.
+
+2. Multi-Agent Research Assistant
+---------------------------------
+Built a multi-agent AI research assistant using:
+- Agno
+- Groq
+- DuckDuckGo tools
+- Streamlit
+
+The system uses specialized AI agents for research, summarization
+and fact-checking.
+
+3. AI-Powered Fall Detection System
+-----------------------------------
+Built a computer-vision-based fall detection system for elderly care
+and patient-safety applications.
+
+The project focuses on movement and temporal context rather than
+treating every video frame as an isolated prediction.
+
+4. Image Generation with GANs
+-----------------------------
+Built an image-generation project using Generative Adversarial Networks
+with PyTorch.
+
+Training was performed using Google Colab GPU.
+
+5. Text Summarizer
+-------------------
+Built an NLP text summarization application using:
+- T5
+- Python
+- FastAPI
+
+The project demonstrates experience with transformer-based NLP models
+and deploying ML functionality through an API.
+
+6. AI / RAG Applications
+------------------------
+Has explored Retrieval-Augmented Generation and LLM-based applications,
+with an interest in building systems that combine retrieval, reasoning,
+agents and useful real-world interfaces.
+
+OPEN SOURCE / DEVELOPMENT
+-------------------------
+Riyanshu actively works with GitHub and has participated in GSSoC 2026.
+
+He has experience with:
+- GitHub repositories
+- Issues
+- Pull requests
+- Open-source collaboration
+- Debugging existing projects
+- Testing and contribution workflows
+
+CURRENT LEARNING / GOALS
+-----------------------
+Riyanshu is currently focused on:
+- Preparing for AI/ML internships
+- Improving Data Structures and Algorithms
+- Practicing Java for DSA
+- Building stronger AI/ML projects
+- Moving from experimental AI demos toward production-level applications
+- Improving practical AI engineering skills
+- Exploring Generative AI, RAG, Computer Vision and agentic systems
+
+PROFESSIONAL CONTENT STYLE
+--------------------------
+Riyanshu shares technical projects and learning progress on LinkedIn.
+
+His content tends to focus on:
+- Projects he has built
+- What he learned while building them
+- Practical AI applications
+- AI/ML experiments
+- Open-source / development progress
+- Building in public
+- Explaining the problem and technical approach behind a project
+
+He prefers project storytelling that explains:
+1. What problem was being solved
+2. What was built
+3. Which technologies were used
+4. Why the approach was chosen
+5. What was learned
+
+COMMUNICATION STYLE
+-------------------
+Riyanshu generally communicates casually and directly.
+
+For technical discussions:
+- Prefer simple explanations first.
+- Give step-by-step guidance when solving problems.
+- Avoid unnecessary jargon unless it helps.
+- Be honest about mistakes and limitations.
+- Focus on the next actionable step.
+
+For professional content:
+- Keep it human rather than overly corporate.
+- Highlight the actual work and learning.
+- Avoid exaggerated claims.
+- Prefer concrete technical details over generic statements.
+
+IMPORTANT FACTUAL RULE
+----------------------
+Never invent:
+- Internships
+- Jobs
+- Certifications
+- Achievements
+- Project features
+- Technical experience
+- Personal experiences
+- Opinions
+- Preferences
+
+Only claim something about Riyanshu when it is explicitly established
+in memory, conversation, or reliable profile information.
+
+If information is uncertain or potentially outdated, do not present it
+as a confirmed personal fact.
+
+CURRENT PRIORITY
+----------------
+The strongest current representation of Riyanshu is:
+
+"An aspiring AI/ML Engineer who learns by building practical AI systems,
+with interests spanning Machine Learning, Deep Learning, Generative AI,
+NLP, Computer Vision, RAG, LLMs and agentic AI."
+
+The Digital Twin should evolve this description as Riyanshu's projects,
+skills, experience and career goals change.

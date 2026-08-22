@@ -1,0 +1,11 @@
+.env
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+data/*.pkl
+data/*.faiss
+
+avatar/audio/*.mp3
