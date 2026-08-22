@@ -1333,7 +1333,7 @@ with avatar_column:
         """
     )
 
-    show_avatar(st.session_state.get("avatar_audio_url"))
+    show_avatar()
 
     html(
         """
