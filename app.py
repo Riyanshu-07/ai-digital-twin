@@ -20,12 +20,10 @@ The AI/RAG/memory pipeline remains 100% intact and compatible.
 
 import os
 import tempfile
-import textwrap
 
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_mic_recorder import mic_recorder
-
 
 from core.llm import generate_response
 from core.personality import PERSONALITY
@@ -43,8 +41,12 @@ from rag.retriever import get_context
 
 
 def html(content: str):
-    """Render HTML with all indentation cleanly stripped from every line so Markdown never escapes it as code."""
-    cleaned = "".join(line.strip() for line in content.strip().splitlines() if line.strip())
+    """Render HTML with indentation stripped from every line so Markdown
+    never escapes it as code. Lines are joined with a single space (not an
+    empty string) so inline text nodes don't get glued together."""
+    cleaned = " ".join(
+        line.strip() for line in content.strip().splitlines() if line.strip()
+    )
     st.markdown(cleaned, unsafe_allow_html=True)
 
 
@@ -53,7 +55,7 @@ def html(content: str):
 # ============================================================
 
 st.set_page_config(
-    page_title="AI Digital Twin // Neural Matrix",
+    page_title="AETHER // AI Digital Twin",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -61,19 +63,14 @@ st.set_page_config(
 
 
 # ============================================================
-# AVATAR IFRAME
-# ============================================================
-
-# ============================================================
 # AI DIGITAL TWIN AVATAR
 # ============================================================
 
 def show_avatar():
-
     components.iframe(
         "http://localhost:8000/avatar/",
         height=700,
-        scrolling=False
+        scrolling=False,
     )
 
 
@@ -1145,7 +1142,7 @@ with st.sidebar:
         """
         <div class="sidebar-brand">
             <div class="sidebar-brand-icon">⚡</div>
-            Digital Twin
+            AETHER
         </div>
         <div class="sidebar-subtitle">Quantum Neural Matrix</div>
         """
@@ -1158,7 +1155,7 @@ with st.sidebar:
                 <div class="online-dot"></div>
                 <div class="online-dot-radar"></div>
             </div>
-            <div class="online-text">Neural Core // Online</div>
+            <div class="online-text">Neural Core // Online v1.0</div>
         </div>
         """
     )
@@ -1204,7 +1201,7 @@ with st.sidebar:
         st.caption("No long-term memories indexed yet.")
     else:
         for memory in memories:
-            importance_val = memory.get('importance', 3)
+            importance_val = memory.get("importance", 3)
             importance_pct = int((importance_val / 5) * 100)
 
             html(
@@ -1262,7 +1259,7 @@ with st.sidebar:
     html(
         """
         <div class="footer-note">
-            AI DIGITAL TWIN // MATRIX v4.8
+            AETHER // NEURAL MATRIX
         </div>
         """
     )
@@ -1280,7 +1277,7 @@ html(
                 QUANTUM AI // LIVE SYNAPSE INSTANCE
             </div>
             <div class="title">
-                Digital Twin Command Deck
+                AETHER Command Deck
             </div>
             <div class="subtitle">
                 Persistent persona intelligence powered by neural memory, RAG, and real-time 3D embodiment.
@@ -1294,7 +1291,7 @@ html(
             </div>
             <div class="synapse-info">
                 <div class="synapse-tag">NEURAL CORE</div>
-                <div class="synapse-status">ACTIVE // SYNAPSE v4.8</div>
+                <div class="synapse-status">ACTIVE // SYNAPSE v1.0 </div>
             </div>
         </div>
     </div>
@@ -1340,7 +1337,7 @@ with avatar_column:
         <div class="stage-footer">
             <div class="telemetry">
                 <div class="telemetry-label">Identity Core</div>
-                <div class="telemetry-value">Digital Twin</div>
+                <div class="telemetry-value">AETHER</div>
             </div>
             <div class="telemetry">
                 <div class="telemetry-label">Memory Stream</div>
@@ -1373,7 +1370,7 @@ with chat_column:
             </div>
             <div class="stream-status-pill">
                 <div class="status-dot"></div>
-                <span class="stream-status-text">DIGITAL TWIN ONLINE</span>
+                <span class="stream-status-text">AETHER ONLINE</span>
             </div>
         </div>
         """
@@ -1390,7 +1387,7 @@ with chat_column:
                     <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 15px rgba(0,240,255,0.4));">⚡</div>
                     <div style="font-family:'Outfit', sans-serif; font-size: 1.05rem; font-weight: 800; color: #e2e8f0; margin-bottom: 6px;">Neural Stream Connected</div>
                     <div style="font-size: 0.76rem; max-width: 320px; margin: 0 auto; line-height: 1.5;">
-                        Speak via the microphone below or transmit text to interact with your Digital Twin.
+                        Speak via the microphone below or transmit text to interact with AETHER.
                     </div>
                 </div>
                 """
@@ -1436,10 +1433,10 @@ with chat_column:
     # Audio playback channel if available
     project_root = os.path.dirname(os.path.abspath(__file__))
     audio_path = os.path.join(
-    project_root,
-    "avatar",
-    "audio",
-    "latest.mp3"
+        project_root,
+        "avatar",
+        "audio",
+        "latest.mp3",
     )
 
     if (
@@ -1451,69 +1448,86 @@ with chat_column:
         with st.expander("🔊 Voice Output", expanded=False):
 
             with open(audio_path, "rb") as audio_file:
-
                 audio_bytes = audio_file.read()
-
-                st.audio(
-                    audio_bytes,
-                    format="audio/mpeg"
-                )
+                st.audio(audio_bytes, format="audio/mpeg")
 
             # Avatar audio URL
-            avatar_audio_url = (
-                "http://localhost:8000/avatar/audio/latest.mp3"
-            )
+            avatar_audio_url = "http://localhost:8000/avatar/audio/latest.mp3"
 
-            # Send the audio URL to the avatar
+            # Send the audio URL to the avatar iframe
             st.markdown(
                 f"""
                 <script>
                     window.parent.postMessage(
                         {{
-                            type: "",
+                            type: "avatar_audio_update",
                             audioUrl: "{avatar_audio_url}"
                         }},
                         "*"
                     );
                 </script>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
+
+
 # ============================================================
 # VOICE PROCESSING
 # ============================================================
 
+
+
 voice_text = ""
 
-if audio:
+if audio and audio.get("bytes"):
     speech_audio_path = None
+
     try:
-        with tempfile.NamedTemporaryFile(
-            suffix=".wav",
-            delete=False,
-        ) as temp_audio:
-            temp_audio.write(audio["bytes"])
-            speech_audio_path = temp_audio.name
+        audio_bytes = audio["bytes"]
 
-        with st.spinner("🎧 Transcribing voice input..."):
-            voice_text = speech_to_text(speech_audio_path)
+        # Ignore empty or extremely short recordings
+        if len(audio_bytes) < 1000:
+            st.warning("🎙️ Recording is too short. Please speak for a moment.")
 
-        if voice_text:
-            st.info(f"🎙 Transcribed: {voice_text}")
+        else:
+            with tempfile.NamedTemporaryFile(
+                suffix=".wav",
+                delete=False,
+            ) as temp_audio:
+
+                temp_audio.write(audio_bytes)
+                temp_audio.flush()
+                speech_audio_path = temp_audio.name
+
+            with st.spinner("🎧 Detecting speech..."):
+                voice_text = speech_to_text(speech_audio_path)
+
+            voice_text = (voice_text or "").strip()
+
+            if voice_text:
+                st.success(f"🎙️ Detected: {voice_text}")
+            else:
+                st.warning(
+                    "🎙️ I couldn't detect clear speech. "
+                    "Please try recording again."
+                )
 
     except Exception as e:
-        st.warning(f"Speech-to-text failed: {e}")
+        st.error(f"🎙️ Voice detection failed: {e}")
 
     finally:
         if speech_audio_path and os.path.exists(speech_audio_path):
-            os.remove(speech_audio_path)
+            try:
+                os.remove(speech_audio_path)
+            except OSError:
+                pass
 
 
 # ============================================================
 # TEXT INPUT
 # ============================================================
 
-typed_text = st.chat_input("Transmit message to Digital Twin...")
+typed_text = st.chat_input("Transmit message to AETHER...")
 
 user_input = voice_text or typed_text
 
@@ -1553,8 +1567,7 @@ if user_input:
     )
 
     long_term_context = "\n".join(
-        f"- {memory['content']}"
-        for memory in long_term_memories
+        f"- {memory['content']}" for memory in long_term_memories
     )
 
     if not long_term_context:
@@ -1689,9 +1702,9 @@ CORE BEHAVIOR
     Instead, respond naturally as part of the conversation.
 
 12. RESPONSE STYLE
-    Keep answers concise when the question is simple.
-    Give more detail when the question requires explanation.
-    Avoid repeating information the user already knows.
+    Always answer in a maximum of 2 lines (under ~40 words), no matter how
+    detailed the available context is. Trim detail rather than exceed the limit.
+    No greetings, no repeating the question, no filler.
 
 13. CONTINUITY
     When appropriate, naturally refer to previous conversation topics,
@@ -1720,44 +1733,28 @@ Now answer the CURRENT USER QUESTION.
     # TTS VOICE SYNTHESIS
     # ========================================================
 
-    # ========================================================
-# TTS VOICE SYNTHESIS
-# ========================================================
-
     try:
-
-        project_root = os.path.dirname(
-            os.path.abspath(__file__)
-        )
+        project_root = os.path.dirname(os.path.abspath(__file__))
 
         avatar_audio_dir = os.path.join(
             project_root,
             "avatar",
-            "audio"
+            "audio",
         )
 
-        os.makedirs(
-            avatar_audio_dir,
-            exist_ok=True
-        )
+        os.makedirs(avatar_audio_dir, exist_ok=True)
 
         audio_path = os.path.join(
             avatar_audio_dir,
-            "latest.mp3"
+            "latest.mp3",
         )
 
         with st.spinner("🔊 Synthesizing avatar voice..."):
-
-            text_to_speech(
-                response,
-                audio_path
-            )
+            text_to_speech(response, audio_path)
 
     except Exception as e:
+        st.warning(f"Voice generation warning: {e}")
 
-        st.warning(
-            f"Voice generation warning: {e}"
-        )
     # ========================================================
     # MEMORY UPDATES
     # ========================================================

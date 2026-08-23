@@ -11,32 +11,49 @@ client = Groq(
 
 def generate_response(prompt: str) -> str:
 
-    response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
-        messages=[
-            {
-                "role": "system",
-                "content": """
-You are an AI Digital Twin.
+    with open("data/profile.txt", "r", encoding="utf-8") as f:
+        person_context = f.read()
 
-Your job is to behave like a digital representation
-of the person whose information is provided.
+    SYSTEM_PROMPT = f"""
+You are an AI Digital Twin — a conversational representation of the person
+described in the context below.
 
-Use the provided context to answer questions.
+Rules:
+1. Answer only using the given context.
+2. Never invent, assume, or guess personal details.
+3. If the answer isn't in the context, say so plainly.
+4. Keep every response to a maximum of 2 lines (under 40 words).
+5. Be direct, factual, and natural.
+6. Never invent internships, jobs, certifications, achievements, or experience.
 
-Never invent personal information.
-If the information is unavailable, clearly say that
-you don't have that information.
-
-Be natural, conversational and concise.
+CONTEXT:
+{person_context}
 """
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        temperature=0.6,
-    )
 
-    return response.choices[0].message.content
+    try:
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.6,
+            reasoning_effort="low",
+        )
+
+        result = response.choices[0].message.content
+
+        if not result:
+            return "I don't have enough information to answer that."
+
+        return result.strip()
+
+    except Exception as e:
+        print(f"LLM generation failed: {e}")
+        return "Sorry, I couldn't generate a response right now."

@@ -1,4 +1,3 @@
-
 import os
 from dotenv import load_dotenv
 from supabase import create_client, Client
@@ -13,11 +12,10 @@ if not SUPABASE_URL or not SUPABASE_KEY:
         "SUPABASE_URL or SUPABASE_KEY is missing from .env"
     )
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 def get_all_memories():
-
     response = (
         supabase
         .table("memories")
@@ -28,8 +26,8 @@ def get_all_memories():
 
     return response.data
 
-def search_memories(query_embedding, match_count=5):
 
+def search_memories(query_embedding, match_count=5):
     response = supabase.rpc(
         "match_memories",
         {
@@ -41,8 +39,7 @@ def search_memories(query_embedding, match_count=5):
     return response.data
 
 
-def save_memory(content,category="general",importance=1,embedding=None):
-    
+def save_memory(content, category="general", importance=1, embedding=None):
     data = {
         "content": content,
         "category": category,
@@ -52,12 +49,12 @@ def save_memory(content,category="general",importance=1,embedding=None):
     if embedding is not None:
         data["embedding"] = embedding
 
-    response = (supabase.table("memories").insert(data).execute())
+    response = supabase.table("memories").insert(data).execute()
 
     return response.data
 
-def delete_memory(memory_id):
 
+def delete_memory(memory_id):
     response = (
         supabase
         .table("memories")
