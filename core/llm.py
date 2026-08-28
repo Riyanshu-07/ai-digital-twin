@@ -9,6 +9,7 @@ client = Groq(
 )
 
 
+
 def generate_response(prompt: str) -> str:
 
     with open("data/profile.txt", "r", encoding="utf-8") as f:
@@ -57,3 +58,5 @@ CONTEXT:
     except Exception as e:
         print(f"LLM generation failed: {e}")
         return "Sorry, I couldn't generate a response right now."
+
+

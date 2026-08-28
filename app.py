@@ -1376,7 +1376,6 @@ with chat_column:
         """
     )
 
-    # Scrollable stream container
     stream_box = st.container(height=490)
 
     with stream_box:
@@ -1384,7 +1383,7 @@ with chat_column:
             html(
                 """
                 <div style="text-align:center; padding: 60px 20px; color: #64748b;">
-                    <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 15px rgba(0,240,255,0.4));">⚡</div>
+                    <div style="font-size: 2.2rem; margin-bottom: 12px;">⚡</div>
                     <div style="font-family:'Outfit', sans-serif; font-size: 1.05rem; font-weight: 800; color: #e2e8f0; margin-bottom: 6px;">Neural Stream Connected</div>
                     <div style="font-size: 0.76rem; max-width: 320px; margin: 0 auto; line-height: 1.5;">
                         Speak via the microphone below or transmit text to interact with AETHER.
@@ -1397,7 +1396,8 @@ with chat_column:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-    # Voice Input Deck directly under the stream box
+    
+    # Voice Input Deck directly under the Vision section.
     html(
         """
         <div class="voice-input-deck">
@@ -1430,52 +1430,10 @@ with chat_column:
         key="voice_input",
     )
 
-    # Audio playback channel if available
-    project_root = os.path.dirname(os.path.abspath(__file__))
-    audio_path = os.path.join(
-        project_root,
-        "avatar",
-        "audio",
-        "latest.mp3",
-    )
-
-    if (
-        os.path.exists(audio_path)
-        and os.path.getsize(audio_path) > 0
-        and len(st.session_state.messages) > 0
-    ):
-
-        with st.expander("🔊 Voice Output", expanded=False):
-
-            with open(audio_path, "rb") as audio_file:
-                audio_bytes = audio_file.read()
-                st.audio(audio_bytes, format="audio/mpeg")
-
-            # Avatar audio URL
-            avatar_audio_url = "http://localhost:8000/avatar/audio/latest.mp3"
-
-            # Send the audio URL to the avatar iframe
-            st.markdown(
-                f"""
-                <script>
-                    window.parent.postMessage(
-                        {{
-                            type: "avatar_audio_update",
-                            audioUrl: "{avatar_audio_url}"
-                        }},
-                        "*"
-                    );
-                </script>
-                """,
-                unsafe_allow_html=True,
-            )
-
 
 # ============================================================
 # VOICE PROCESSING
 # ============================================================
-
-
 
 voice_text = ""
 
@@ -1485,16 +1443,13 @@ if audio and audio.get("bytes"):
     try:
         audio_bytes = audio["bytes"]
 
-        # Ignore empty or extremely short recordings
         if len(audio_bytes) < 1000:
             st.warning("🎙️ Recording is too short. Please speak for a moment.")
-
         else:
             with tempfile.NamedTemporaryFile(
                 suffix=".wav",
                 delete=False,
             ) as temp_audio:
-
                 temp_audio.write(audio_bytes)
                 temp_audio.flush()
                 speech_audio_path = temp_audio.name
@@ -1522,7 +1477,6 @@ if audio and audio.get("bytes"):
             except OSError:
                 pass
 
-
 # ============================================================
 # TEXT INPUT
 # ============================================================
@@ -1538,53 +1492,67 @@ user_input = voice_text or typed_text
 
 if user_input:
 
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": user_input,
-        }
-    )
+    user_input = str(user_input).strip()
 
-    # ========================================================
-    # RAG RETRIEVAL
-    # ========================================================
+    if user_input:
 
-    with st.spinner("📚 Querying knowledge base..."):
-        retrieved_context = get_context(
-            user_input,
-            top_k=3,
+        st.session_state.messages.append(
+            {
+                "role": "user",
+                "content": user_input,
+            }
         )
 
-    # ========================================================
-    # EMBEDDING + LONG-TERM MEMORY
-    # ========================================================
+        # ========================================================
+        # RAG RETRIEVAL
+        # ========================================================
 
-    query_embedding = create_embedding(user_input)
+        try:
+            with st.spinner("📚 Querying knowledge base..."):
+                retrieved_context = get_context(
+                    user_input,
+                    top_k=3,
+                )
+        except Exception as e:
+            retrieved_context = "No relevant knowledge could be retrieved."
+            st.warning(f"RAG warning: {e}")
 
-    long_term_memories = search_memories(
-        query_embedding,
-        match_count=5,
-    )
+        # ========================================================
+        # EMBEDDING + LONG-TERM MEMORY
+        # ========================================================
 
-    long_term_context = "\n".join(
-        f"- {memory['content']}" for memory in long_term_memories
-    )
+        try:
+            query_embedding = create_embedding(user_input)
+            long_term_memories = search_memories(
+                query_embedding,
+                match_count=5,
+            )
+        except Exception as e:
+            long_term_memories = []
+            st.warning(f"Memory retrieval warning: {e}")
 
-    if not long_term_context:
-        long_term_context = "No relevant long-term memories found."
+        long_term_context = "\n".join(
+            f"- {memory['content']}" for memory in long_term_memories
+        )
 
-    # ========================================================
-    # CONVERSATION MEMORY
-    # ========================================================
+        if not long_term_context:
+            long_term_context = "No relevant long-term memories found."
 
-    conversation_context = st.session_state.memory.get_context()
+        # ========================================================
+        # CONVERSATION MEMORY
+        # ========================================================
 
-    # ========================================================
-    # PROMPT
-    # ========================================================
+        try:
+            conversation_context = st.session_state.memory.get_context()
+        except Exception as e:
+            conversation_context = ""
+            st.warning(f"Conversation memory warning: {e}")
 
     prompt = f"""
-You are an AI Digital Twin designed to communicate as a consistent, natural representation of the user.
+You are AETHER, Riyanshu Kandwal's AI Digital Twin and personalized AI assistant.
+Communicate as a consistent, natural representation of Riyanshu's known professional
+identity and communication style, without impersonating personal experiences that are
+not established in the available context.
 
 ========================
 PERSONALITY
@@ -1702,9 +1670,10 @@ CORE BEHAVIOR
     Instead, respond naturally as part of the conversation.
 
 12. RESPONSE STYLE
-    Always answer in a maximum of 2 lines (under ~40 words), no matter how
-    detailed the available context is. Trim detail rather than exceed the limit.
-    No greetings, no repeating the question, no filler.
+    Keep simple answers concise. For technical questions, project discussions, or
+    requests for guidance, give the useful explanation and concrete next steps needed
+    to solve the problem. Prefer short paragraphs or bullets when they improve clarity.
+    Do not add greetings, repeat the question, or use filler.
 
 13. CONTINUITY
     When appropriate, naturally refer to previous conversation topics,
@@ -1720,14 +1689,26 @@ same person, while remaining strictly grounded in the information available to y
 Never invent personal information just to make the response sound convincing.
 
 Now answer the CURRENT USER QUESTION.
-"""
+    """
+
+
 
     # ========================================================
     # GENERATE RESPONSE
     # ========================================================
 
-    with st.spinner("🧠 Neural synthesis in progress..."):
-        response = generate_response(prompt)
+    try:
+        with st.spinner("🧠 Neural synthesis in progress..."):
+            response = generate_response(prompt)
+
+        response = str(response or "").strip()
+
+        if not response:
+            response = "I don't have enough information to answer that right now."
+
+    except Exception as e:
+        response = "Sorry, I couldn't generate a response right now."
+        st.error(f"LLM generation failed: {e}")
 
     # ========================================================
     # TTS VOICE SYNTHESIS
@@ -1752,6 +1733,9 @@ Now answer the CURRENT USER QUESTION.
         with st.spinner("🔊 Synthesizing avatar voice..."):
             text_to_speech(response, audio_path)
 
+        if not os.path.exists(audio_path) or os.path.getsize(audio_path) == 0:
+            raise RuntimeError("TTS did not create a valid audio file.")
+
     except Exception as e:
         st.warning(f"Voice generation warning: {e}")
 
@@ -1759,8 +1743,11 @@ Now answer the CURRENT USER QUESTION.
     # MEMORY UPDATES
     # ========================================================
 
-    st.session_state.memory.add_message("user", user_input)
-    st.session_state.memory.add_message("assistant", response)
+    try:
+        st.session_state.memory.add_message("user", user_input)
+        st.session_state.memory.add_message("assistant", response)
+    except Exception as e:
+        st.warning(f"Conversation memory update warning: {e}")
 
     st.session_state.messages.append(
         {
@@ -1778,4 +1765,6 @@ Now answer the CURRENT USER QUESTION.
     except Exception as e:
         print("Memory processing warning:", e)
 
+    # Re-render the chat stream so the new response appears
+    # inside DIGITAL CONVERSATION.
     st.rerun()

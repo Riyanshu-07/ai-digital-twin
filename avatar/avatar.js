@@ -477,9 +477,15 @@ function setAvatarStatus(
 // VOICE ENABLE BUTTON
 // ============================================================
 
-const voiceButton =
-    document.getElementById("voice-button") ||
-    document.createElement("button");
+let voiceButton =
+    document.getElementById("voice-button");
+
+if (!voiceButton) {
+    voiceButton = document.createElement("button");
+    voiceButton.id = "voice-button";
+    voiceButton.textContent = "🔊 ENABLE VOICE";
+    document.body.appendChild(voiceButton);
+}
 
 
 // ============================================================
@@ -501,6 +507,9 @@ let audioData =
 let avatarAudio =
     null;
 
+let voiceEnabled =
+    false;
+
 
 // ============================================================
 // AUDIO ANALYSER
@@ -519,8 +528,16 @@ function setupAudioAnalyser(
     }
 
 
+    const AudioContextClass =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+    if (!AudioContextClass) {
+        throw new Error("Web Audio API is not supported in this browser.");
+    }
+
     audioContext =
-        new AudioContext();
+        new AudioContextClass();
 
 
     analyser =
@@ -710,35 +727,78 @@ voiceButton.addEventListener(
 
             setupAvatarAudio();
 
-
             if (
                 audioContext &&
-                audioContext.state ===
-                    "suspended"
+                audioContext.state === "suspended"
             ) {
-
                 await audioContext.resume();
-
             }
 
-
-            voiceButton.remove();
-
+            voiceEnabled = true;
 
             console.log(
-                "🔓 Voice enabled"
+                "[AETHER] AudioContext:",
+                audioContext?.state
             );
 
+            // The button click is a real user gesture.
+            // Start the current TTS audio immediately.
+            avatarAudio.src =
+                `${AVATAR_AUDIO}?ts=${Date.now()}`;
+
+            avatarAudio.load();
+
+            await avatarAudio.play();
+
+            // Prevent the polling loop from replaying the same file.
+            try {
+                const response = await fetch(
+                    `${AVATAR_AUDIO}?ts=${Date.now()}`,
+                    {
+                        method: "HEAD",
+                        cache: "no-store"
+                    }
+                );
+
+                if (response.ok) {
+                    const modified =
+                        response.headers.get("last-modified") || "";
+
+                    const size =
+                        response.headers.get("content-length") || "";
+
+                    lastAudioVersion =
+                        `${modified}-${size}`;
+                }
+            } catch (versionError) {
+                console.warn(
+                    "[AETHER] Could not record audio version:",
+                    versionError
+                );
+            }
+
+            console.log(
+                "🔓 Voice enabled + audio playing"
+            );
+
+            // Hide only after successful playback.
+            voiceButton.remove();
+
         }
-        catch (
-            error
-        ) {
+        catch (error) {
+
+            voiceEnabled = false;
 
             console.error(
                 "❌ Voice enable failed:",
                 error
             );
 
+            console.log(
+                "[AETHER] Check that ./audio/latest.mp3 exists."
+            );
+
+            setAvatarStatus("online");
         }
 
     }
@@ -850,6 +910,12 @@ let lastAudioVersion =
 
 async function checkForNewAudio() {
 
+    // Do not attempt autoplay until the user has explicitly
+    // enabled voice through the button.
+    if (!voiceEnabled) {
+        return;
+    }
+
     try {
 
         const response =
@@ -861,101 +927,73 @@ async function checkForNewAudio() {
                 }
             );
 
-
-        if (
-            !response.ok
-        ) {
-
+        if (!response.ok) {
             return;
-
         }
 
-
         const modified =
-            response.headers.get(
-                "last-modified"
-            );
-
+            response.headers.get("last-modified") || "";
 
         const size =
-            response.headers.get(
-                "content-length"
-            );
-
+            response.headers.get("content-length") || "";
 
         const version =
             `${modified}-${size}`;
 
-
         if (
-            lastAudioVersion ===
-            version
+            lastAudioVersion === version
         ) {
-
             return;
-
         }
-
-
-        lastAudioVersion =
-            version;
-
 
         console.log(
             "🔊 New TTS audio detected"
         );
 
-
         setupAvatarAudio();
-
 
         avatarAudio.src =
             `${AVATAR_AUDIO}?ts=${Date.now()}`;
 
-
         avatarAudio.load();
-
 
         try {
 
             if (
                 audioContext &&
-                audioContext.state ===
-                    "suspended"
+                audioContext.state === "suspended"
             ) {
-
                 await audioContext.resume();
-
             }
-
 
             await avatarAudio.play();
 
+            // IMPORTANT:
+            // Mark the file as processed only after
+            // playback succeeds.
+            lastAudioVersion =
+                version;
 
             console.log(
                 "▶️ New avatar audio playing"
             );
 
         }
-        catch (
-            error
-        ) {
+        catch (error) {
 
             console.warn(
-                "⚠️ Automatic playback blocked:",
+                "⚠️ Automatic playback failed:",
                 error
             );
 
             console.log(
-                "Click 🔊 Enable Voice to allow audio."
+                "Voice remains enabled; retrying on next audio change."
             );
 
         }
 
     }
-    catch (
-        error
-    ) {
+    catch (error) {
 
         console.warn(
             "Audio detection failed:",
@@ -1213,8 +1251,12 @@ window.digitalTwin = {
 
         }
 
+        voiceEnabled = true;
+
         avatarAudio.src =
             `${AVATAR_AUDIO}?ts=${Date.now()}`;
+
+        avatarAudio.load();
 
         await avatarAudio.play();
 
@@ -1225,4 +1267,8 @@ window.digitalTwin = {
 
 console.log(
     "🧠 AI Digital Twin avatar system initialized"
+);
+
+console.log(
+    "[AETHER] Click 🔊 ENABLE VOICE to activate audio."
 );
